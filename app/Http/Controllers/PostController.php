@@ -15,7 +15,7 @@ class PostController extends Controller
 {
   private $isSignedIn;
   public function __construct() {
-    $this->middleware('auth:api', ['except' => []]);
+    $this->middleware('auth:api', ['except' => ['showAllPosts', 'showOnePost']]);
     $this->isSignedIn = Auth::user();
   }
   public function createPostAction(Request $request) {
@@ -148,5 +148,69 @@ class PostController extends Controller
     ]);
   }
 
+  public function showAllPosts() {
+    // Find all posts
+    $posts = Post::all();
+
+    if($posts) {
+      return response()->json([
+        'posts'   => $posts
+      ]);
+    }else {
+      return response()->json([
+        'message' => 'There are no posts yet to be shown.',
+      ]);
+    }
+  }
+
+  public function showOnePost($id) {
+    // Find the post by ID
+    $post = Post::findOrFail($id);
+
+    // Find the post author
+    $author = User::select('firstName', 'lastName', 'avatar')->where('id', $post->user_id)->get();
+
+    if($post) {
+      $data = [
+        'title' => $post->title,
+        'body' => $post->title,
+        'picture' => $post->picture,
+        'updated_at' => $post->updated_at,
+        'author' => $author
+      ];
+
+      return response()->json([
+        'data' => $data
+      ]);
+    }else {
+      return response()->json(['error' => 'Post not found.'], 404);
+    }
+  }
+
+  public function delete($id) {
+     // Get the authenticated user
+     $user = Auth::user();
+
+     // Find the post by ID
+     $post = Post::findOrFail($id);
+ 
+    //Check if the post exist
+    if($post) {
+     // Check if the user created the post
+     if ($post->user_id !== $user->id) {
+        return response()->json([
+            'message' => 'You are not authorized to delete this post.',
+        ], 403);
+      }else {
+        $post->delete();
+        // Return a success response
+        return response()->json([
+          'message' => 'Post deleted successfully.'
+        ]);
+      }
+    }else {
+      return response()->json(['message' => 'Post not found.']);
+    }
+  }
   
 }

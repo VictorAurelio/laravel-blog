@@ -12,5 +12,11 @@
   Email: {{ $userData['email'] }}
   <hr>
   <img src="{{ $userData['avatar'] }}" alt="{{ $userData['title'] }}" style="width:50px; height:50px">
+  <hr>
+  <div class="user-posts">
+    <div class="post-title">
+      <h1>{{ $userData['posts'] }}</h1>
+    </div>
+  </div>
 </body>
 </html>

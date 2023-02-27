@@ -36,7 +36,13 @@ Route::get('/user/profile/{id}', [UserController::class, 'userProfile'])->name('
 Route::put('/user/edit', [UserController::class, 'editProfileAction'])->name('editProfileAction');
 Route::get('/user/edit', [UserController::class, 'edit'])->name('edit');
 
+//Post create and edit routes
 Route::post('/post/create', [PostController::class, 'createPostAction'])->name('createPostAction');
 Route::put('/post/{id}', [PostController::class, 'editPostAction'])->name('editPostAction');
 Route::post('/post/{id}/picture', [PostController::class, 'updatePostPictureAction'])->name('updatePostPictureAction');
 
+//Post show routes
+Route::get('/post/show', [PostController::class, 'showAllPosts'])->name('showAllPosts');
+Route::get('/post/show/{id}', [PostController::class, 'showOnePost'])->name('showOnePost');
+
+Route::delete('post/{id}', [PostController::class, 'delete'])->name('delete');

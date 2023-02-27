@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -18,7 +19,7 @@ class UserController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['register']]);
+        $this->middleware('auth:api', ['except' => ['register', 'userProfile']]);
         $this->isSignedIn = Auth::user();
     }
 
@@ -33,12 +34,15 @@ class UserController extends Controller
     public function myProfile() {
       $user = $this->isSignedIn;
 
+      $posts = $user->posts;
+
       $userData = [
           'firstName' => $user->firstName,
           'lastName' => $user->lastName,
           'title' => $user->firstName . ' ' . $user->lastName,
           'email' => $user->email,
           'avatar' => url('media/avatars/' . $user->avatar),
+          'posts' => $posts
       ];
 
       if (request()->expectsJson()) {
