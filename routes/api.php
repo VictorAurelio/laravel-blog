@@ -38,11 +38,12 @@ Route::get('/user/edit', [UserController::class, 'edit'])->name('edit');
 
 //Post create and edit routes
 Route::post('/post/create', [PostController::class, 'createPostAction'])->name('createPostAction');
-Route::put('/post/{id}', [PostController::class, 'editPostAction'])->name('editPostAction');
-Route::post('/post/{id}/picture', [PostController::class, 'updatePostPictureAction'])->name('updatePostPictureAction');
+Route::put('/post/{post}', [PostController::class, 'editPostAction'])->name('editPostAction');
+Route::post('/post/{post}/picture', [PostController::class, 'updatePostPictureAction'])->name('updatePostPictureAction');
 
 //Post show routes
 Route::get('/post/show', [PostController::class, 'showAllPosts'])->name('showAllPosts');
-Route::get('/post/show/{id}', [PostController::class, 'showOnePost'])->name('showOnePost');
+Route::get('/post/show/{post}', [PostController::class, 'showOnePost'])->name('showOnePost');
 
-Route::delete('post/{id}', [PostController::class, 'delete'])->name('delete');
+//Post delete route
+Route::delete('post/{post}', [PostController::class, 'delete'])->name('delete');

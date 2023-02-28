@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -62,12 +63,9 @@ class PostController extends Controller
     ]);
   }
 
-  public function editPostAction(Request $request, $id) {
+  public function editPostAction(Request $request, Post $post) {
     // Get the authenticated user
     $user = Auth::user();
-
-    // Find the post by ID
-    $post = Post::findOrFail($id);
 
     // Check if the user created the post
     if ($post->user_id !== $user->id) {
@@ -78,7 +76,7 @@ class PostController extends Controller
 
     // Validate the request data
     $validatedData = $request->validate([
-        'title' => 'sometimes|string|max:255|unique:posts,title,'.$id,
+        'title' => 'sometimes|string|max:255|unique:posts,title,'.$post->id,
         'body' => 'sometimes|string'
     ]);
 
@@ -106,12 +104,9 @@ class PostController extends Controller
     ]);
   }
 
-  public function updatePostPictureAction(Request $request, $postId) {
+  public function updatePostPictureAction(Request $request, Post $post) {
     // Get the authenticated user
     $user = Auth::user();
-
-    // Find the post by id
-    $post = Post::findOrFail($postId);
 
     // Check if the user is the owner of the post
     if ($user->id !== $post->user_id) {
@@ -149,68 +144,46 @@ class PostController extends Controller
   }
 
   public function showAllPosts() {
-    // Find all posts
-    $posts = Post::all();
+    // Get all posts with pagination
+    $posts = Post::paginate(10);
 
-    if($posts) {
-      return response()->json([
-        'posts'   => $posts
-      ]);
-    }else {
-      return response()->json([
-        'message' => 'There are no posts yet to be shown.',
-      ]);
-    }
-  }
-
-  public function showOnePost($id) {
-    // Find the post by ID
-    $post = Post::findOrFail($id);
-
-    // Find the post author
-    $author = User::select('firstName', 'lastName', 'avatar')->where('id', $post->user_id)->get();
-
-    if($post) {
-      $data = [
-        'title' => $post->title,
-        'body' => $post->title,
-        'picture' => $post->picture,
-        'updated_at' => $post->updated_at,
-        'author' => $author
-      ];
-
-      return response()->json([
-        'data' => $data
-      ]);
-    }else {
-      return response()->json(['error' => 'Post not found.'], 404);
-    }
-  }
-
-  public function delete($id) {
-     // Get the authenticated user
-     $user = Auth::user();
-
-     // Find the post by ID
-     $post = Post::findOrFail($id);
- 
-    //Check if the post exist
-    if($post) {
-     // Check if the user created the post
-     if ($post->user_id !== $user->id) {
+    if(count($posts) > 0) {
         return response()->json([
-            'message' => 'You are not authorized to delete this post.',
-        ], 403);
-      }else {
-        $post->delete();
-        // Return a success response
-        return response()->json([
-          'message' => 'Post deleted successfully.'
+            'posts' => $posts->items(),
+            'current_page' => $posts->currentPage(),
+            'total_pages' => $posts->lastPage(),
+            'per_page' => $posts->perPage(),
+            'total_posts' => $posts->total()
         ]);
-      }
-    }else {
-      return response()->json(['message' => 'Post not found.']);
+    } else {
+        return response()->json([
+            'message' => 'There are no posts yet to be shown.',
+        ]);
     }
+  }
+
+  public function showOnePost(Post $post) {
+    return new PostResource($post);
+  }
+
+  public function delete(Post $post) {
+    // Get the authenticated user
+    $user = Auth::user();
+
+    // Check if the user created the post
+    if ($post->user_id !== $user->id) {
+       return response()->json([
+           'error' => 'You are not authorized to delete this post.',
+       ], 401);
+    }
+    
+    // Delete the post
+    $post->delete();
+
+    // Return a success response
+    return response()->json([
+       'message' => 'Post deleted successfully.'
+    ], 204);
   }
   
 }
