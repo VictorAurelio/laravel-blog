@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,10 +31,11 @@ Route::post('/auth/refresh', [AuthController::class, 'refreshToken'])->name('ref
 Route::get('/user/profile', [UserController::class, 'myProfile'])->name('myProfile');
 
 //User profile route (guest)
-Route::get('/user/profile/{id}', [UserController::class, 'userProfile'])->name('userProfile');
+Route::get('/user/profile/{user}', [UserController::class, 'userProfile'])->name('userProfile');
 
 //User edit profile route
 Route::put('/user/edit', [UserController::class, 'editProfileAction'])->name('editProfileAction');
+Route::post('/user/{user}/edit/picture', [UserController::class, 'updateProfilePictureAction'])->name('updateProfilePictureAction');
 Route::get('/user/edit', [UserController::class, 'edit'])->name('edit');
 
 //Post create and edit routes
@@ -47,3 +49,12 @@ Route::get('/post/show/{post}', [PostController::class, 'showOnePost'])->name('s
 
 //Post delete route
 Route::delete('post/{post}', [PostController::class, 'delete'])->name('delete');
+
+// Create review route
+Route::post('/post/{post}/review', [ReviewController::class, 'createReview'])->name('createReview');
+
+// Show review route
+Route::get('/post/{post}/review', [ReviewController::class, 'showReviews'])->name('showReviews');
+
+// Delete review route
+Route::delete('/post/{post}/review/{review}', [ReviewController::class, 'deleteReview'])->name('deleteReview');

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 
@@ -52,8 +53,7 @@ class UserController extends Controller
       }
     }
 
-    public function userProfile($id) {
-      $user = User::find($id);
+    public function userProfile(User $user) {
 
       if($user) {
         $avatar = url('media/avatars/'.$user['avatar']);
@@ -136,6 +136,43 @@ class UserController extends Controller
       ]);
     }
 
+    public function updateProfilePictureAction(Request $request, User $user) {
+      // Get the authenticated user
+      $isSignedIn = Auth::user();
+  
+      // Check if the user is the one authenticated
+      if ($user->id !== $isSignedIn->id) {
+          return response()->json([
+              'message' => 'You are not authorized to update this profile.',
+          ], 401);
+      }
+  
+      // Validate the request data
+      $validator = Validator::make($request->all(), [
+          'picture' => 'required|image|max:2048|mimes:jpg,png,svg,jpeg',
+      ]);
+  
+      if ($validator->fails()) {
+          return response()->json([
+              'message' => 'Invalid picture file.',
+              'errors' => $validator->errors(),
+          ], 400);
+      }
+  
+      // Upload the picture
+      $picture = $request->file('picture');
+      $path = $picture->store('public/posts');
+      $url = Storage::url($path);
+  
+      // Update the user's picture
+      $user->avatar = $url;
+      $user->save();
+  
+      return response()->json([
+          'message' => 'User picture updated successfully.',
+          'user' => $user,
+      ]);
+    }
     public function edit() {
       $user = [
         'firstName' => $this->isSignedIn->firstName,
